@@ -1,28 +1,49 @@
 'use strict';
 
-angular.module('myApp.scaleBodyService', [])
+angular.module('myApp')
   .service('scaleBodyService', function($window, $log) {
     var doc = $window.document;
-    var body = doc.body;
     var gameSize = null;
+    var oldSizes = null;
 
     function scaleBody(_gameSize) {
       gameSize = _gameSize;
       rescale();
     }
+    function round2(num) {
+      return Math.round(num * 100) / 100;
+    }
 
     function rescale() {
+      var body = doc.body;
       if (gameSize === null) {
         return;
       }
-      $log.info(["Scaling the body to size: ", gameSize]);
       var myGameWidth = gameSize.width;
       var myGameHeight = gameSize.height;
-      var scaleX = $window.innerWidth / myGameWidth;
-      var scaleY = $window.innerHeight / myGameHeight;
-      var scale = Math.min(scaleX, scaleY);
-      var tx = (window.innerWidth / scale - myGameWidth) / 2;
-      var ty = (window.innerHeight / scale - myGameHeight) / 2;
+      var windowWidth = $window.innerWidth; // body.clientWidth
+      var windowHeight = $window.innerHeight; // I saw cases where body.clientHeight was 0.
+      if (oldSizes !== null) {
+        if (oldSizes.myGameWidth === myGameWidth &&
+            oldSizes.myGameHeight === myGameHeight &&
+            oldSizes.windowWidth === windowWidth &&
+            oldSizes.windowHeight === windowHeight) {
+          return; // nothing changed, so no need to change the transformations.
+        }
+      }
+      oldSizes = {
+          myGameWidth: myGameWidth,
+          myGameHeight: myGameHeight,
+          windowWidth: windowWidth,
+          windowHeight: windowHeight
+      };
+      $log.info(["Scaling the body to size: ", oldSizes]);
+
+      var scaleX = windowWidth / myGameWidth;
+      var scaleY = windowHeight / myGameHeight;
+      var scale = round2(Math.min(scaleX, scaleY));
+      var tx = round2((windowWidth / scale - myGameWidth) / 2);
+      var ty = round2((windowHeight / scale - myGameHeight) / 2);
       var transformString = "scale(" + scale + "," + scale + ")  translate(" + tx + "px, " + ty + "px)";
       body.style['transform'] = transformString;
       body.style['-o-transform'] = transformString;
@@ -39,7 +60,9 @@ angular.module('myApp.scaleBodyService', [])
 
     $window.onresize = rescale;
     $window.onorientationchange = rescale;
+    doc.addEventListener("onresize", rescale);
     doc.addEventListener("orientationchange", rescale);
+    setInterval(rescale, 1000);
 
     this.scaleBody = scaleBody;
   });
