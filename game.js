@@ -1,4 +1,3 @@
-'use strict';
 
 angular.module('myApp', ['ngTouch'])
   .controller('Ctrl', function (
