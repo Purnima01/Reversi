@@ -3,7 +3,7 @@
 angular.module('myApp', ['ngTouch'])
   .controller('Ctrl', function (
       $window, $scope, $log, $timeout,
-      gameService, scaleBodyService, gameLogic) {
+      gameService, gameLogic) {
 
     function sendComputerMove(){
       gameService.makeMove(
