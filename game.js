@@ -106,7 +106,6 @@ angular.module('myApp', ['ngTouch'])
         }
     }
 
-    scaleBodyService.scaleBody({width: 567, height: 567});
 
     gameService.setGame({
     gameDeveloperEmail: "purnima.p01@gmail.com",
